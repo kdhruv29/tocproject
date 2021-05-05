@@ -1,0 +1,64 @@
+from svg_backend import SVGBackend
+from turtle import Turtle
+from grammar import Grammar
+from turtle import ThickTurtle
+from turtle import NarrowingTurtle
+
+grammar = Grammar()
+
+grammar.add_non_terminal('Forward Right', [
+    lambda turtle: turtle.forward(1.0),
+    lambda turtle: turtle.turn_right(60)
+])
+grammar.add_non_terminal('Forward Left', [
+    lambda turtle: turtle.forward(1.0),
+    lambda turtle: turtle.turn_left(60)
+])
+
+grammar.add_non_terminal('Root', [
+    'Tree',
+    lambda turtle: turtle.turn_left(120),
+    'Tree',
+    lambda turtle: turtle.turn_left(120),
+    'Tree',
+])
+
+scale = 0.5
+grammar.add_non_terminal('Scale', [
+    lambda turtle: turtle.scale(scale),
+    lambda turtle: turtle.scale_thickness(0.6),
+])
+grammar.add_non_terminal('Scale', [])
+
+grammar.add_non_terminal('Tree', [
+    lambda turtle: turtle.store(),
+    'Forward Left',
+    'Scale',
+    'Circle',
+    'Tree',
+    lambda turtle: turtle.restore(),
+    lambda turtle: turtle.store(),
+    'Forward Right',
+    'Scale',
+    'Circle',
+    'Tree',
+    lambda turtle: turtle.restore(),
+], 8)
+
+grammar.add_non_terminal('Tree', [])
+
+grammar.add_non_terminal('Circle', [
+    lambda turtle: turtle.draw_filled_circle(0.2),
+])
+grammar.add_non_terminal('Circle', [
+    lambda turtle: turtle.draw_circle(0.2),
+], 2)
+grammar.add_non_terminal('Circle', [], 8)
+
+#for i in range(0, 5):
+backend = SVGBackend()
+turtle = ThickTurtle(backend)
+turtle.thickness = 0.05
+
+grammar.expand('Root', turtle, 15)
+backend.write('flower4.svg')
